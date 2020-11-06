@@ -39,6 +39,11 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractRefreshableConfigApplicationContext extends AbstractRefreshableApplicationContext
 		implements BeanNameAware, InitializingBean {
 
+	/**
+	 * 表示配置文件的路径,
+	 * 相比于父类{@link AbstractRefreshableApplicationContext}做了进一步明确,
+	 * 但仍不确定时xml还是java-based-config
+	 */
 	@Nullable
 	private String[] configLocations;
 

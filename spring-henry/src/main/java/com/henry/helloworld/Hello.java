@@ -1,6 +1,5 @@
 package com.henry.helloworld;
 
-import com.sun.tracing.dtrace.ArgsAttributes;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
@@ -14,7 +13,14 @@ public class Hello {
 				new AnnotationConfigApplicationContext(HelloWorldAppConfig.class);
 
 		System.out.println("Go Go Go");
+
 		System.out.println(applicationContext.getBean(World.class));
+		System.out.println(applicationContext.getBean(HelloWorldAppConfig.class));
+
+
+		System.out.println(applicationContext.getBeanDefinition("helloWorldAppConfig"));
+		System.out.println(applicationContext.getBeanDefinition("helloWorldAppConfig").getBeanClassName());
+
 		System.out.println("Success ^-^");
 	}
 

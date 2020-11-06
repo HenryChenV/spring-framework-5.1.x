@@ -16,21 +16,8 @@
 
 package org.springframework.beans;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.io.support.SpringFactoriesLoader;
@@ -38,6 +25,11 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
+
+import java.beans.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Internal class that caches JavaBeans {@link java.beans.PropertyDescriptor}
@@ -271,6 +263,10 @@ public final class CachedIntrospectionResults {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
 			}
+
+			/**
+			 * {@link GenericBeanInfo}
+			 */
 			this.beanInfo = getBeanInfo(beanClass);
 
 			if (logger.isTraceEnabled()) {
@@ -292,12 +288,19 @@ public final class CachedIntrospectionResults {
 							(pd.getPropertyEditorClass() != null ?
 									"; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
 				}
+				/**
+				 * 包成{@link GenericTypeAwarePropertyDescriptor}
+				 * 包的过程中会解决JavaBean的内省因为桥接方法解析的问题导致setter问题没找到
+				 * 因为JDK的原因导致getter方法没找到
+				 * 具体的遇到了复杂的case可以看看
+				 */
 				pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
 				this.propertyDescriptors.put(pd.getName(), pd);
 			}
 
 			// Explicitly check implemented interfaces for setter/getter methods as well,
 			// in particular for Java 8 default methods...
+			// 解析接口中的setter/getter
 			Class<?> currClass = beanClass;
 			while (currClass != null && currClass != Object.class) {
 				introspectInterfaces(beanClass, currClass);

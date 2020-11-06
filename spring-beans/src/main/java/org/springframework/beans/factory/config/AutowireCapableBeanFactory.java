@@ -16,14 +16,15 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.Set;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.lang.Nullable;
+
+import java.util.Set;
 
 /**
  * Extension of the {@link org.springframework.beans.factory.BeanFactory}
@@ -52,6 +53,13 @@ import org.springframework.lang.Nullable;
  * interface, which exposes the internal BeanFactory even when running in an
  * ApplicationContext, to get access to an AutowireCapableBeanFactory:
  * simply cast the passed-in BeanFactory to AutowireCapableBeanFactory.
+ *
+ * <p>
+ *     自动注入相关的功能,
+ *     可以从类开始完成bean的创建, 依赖注入, 以及生命周期的操作,
+ *     也可以对指定bean做这些操作,
+ *     @see com.henry.bean.factory.AutowireCapableBeanFactoryTest
+ * </p>
  *
  * @author Juergen Hoeller
  * @since 04.12.2003
@@ -112,6 +120,9 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * bean instance: to be appended to the fully-qualified bean class name,
 	 * e.g. "com.mypackage.MyClass.ORIGINAL", in order to enforce the given instance
 	 * to be returned, i.e. no proxies etc.
+	 *
+	 * 在初始化的时候返回原始给定实例, 而不是代理对象
+	 *
 	 * @since 5.1
 	 * @see #initializeBean(Object, String)
 	 * @see #applyBeanPostProcessorsBeforeInitialization(Object, String)
@@ -122,6 +133,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	//-------------------------------------------------------------------------
 	// Typical methods for creating and populating external bean instances
+	// 创建和对给定的外部bean做属性注入的方法
 	//-------------------------------------------------------------------------
 
 	/**
@@ -132,6 +144,10 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * fields and methods as well as applying all standard bean initialization callbacks.
 	 * It does <i>not</i> imply traditional by-name or by-type autowiring of properties;
 	 * use {@link #createBean(Class, int, boolean)} for those purposes.
+	 *
+	 * 用beanClass创建一个bean, 这个bean会ing过依赖注入, 并执行相关的后置处理器,
+	 * 但不会放入到Spring容器中
+	 *
 	 * @param beanClass the class of the bean to create
 	 * @return the new bean instance
 	 * @throws BeansException if instantiation or wiring failed
@@ -144,6 +160,10 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * <p>Note: This is essentially intended for (re-)populating annotated fields and
 	 * methods, either for new instances or for deserialized instances. It does
 	 * <i>not</i> imply traditional by-name or by-type autowiring of properties;
+	 *
+	 * 给existingBean属性注入, 这个对象可以是Spring容器外的对象
+	 * 主要是调用populateBean
+	 *
 	 * use {@link #autowireBeanProperties} for those purposes.
 	 * @param existingBean the existing bean instance
 	 * @throws BeansException if wiring failed
@@ -158,6 +178,10 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * <p>This is effectively a superset of what {@link #initializeBean} provides,
 	 * fully applying the configuration specified by the corresponding bean definition.
 	 * <b>Note: This method requires a bean definition for the given name!</b>
+	 *
+	 * 配置existingBean，beanName是容器中bean的名称
+	 * populateBean和initializeBean都会被调用
+	 *
 	 * @param existingBean the existing bean instance
 	 * @param beanName the name of the bean, to be passed to it if necessary
 	 * (a bean definition of that name has to be available)
@@ -172,6 +196,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	//-------------------------------------------------------------------------
 	// Specialized methods for fine-grained control over the bean lifecycle
+	// 更细粒度的操纵bean的生命周期的方法
 	//-------------------------------------------------------------------------
 
 	/**
@@ -190,6 +215,12 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @see #AUTOWIRE_BY_NAME
 	 * @see #AUTOWIRE_BY_TYPE
 	 * @see #AUTOWIRE_CONSTRUCTOR
+	 *
+	 * 关于依赖检查
+	 * @see AbstractBeanDefinition#DEPENDENCY_CHECK_NONE
+	 * @see AbstractBeanDefinition#DEPENDENCY_CHECK_OBJECTS
+	 * @see AbstractBeanDefinition#DEPENDENCY_CHECK_SIMPLE
+	 * @see AbstractBeanDefinition#DEPENDENCY_CHECK_ALL
 	 */
 	Object createBean(Class<?> beanClass, int autowireMode, boolean dependencyCheck) throws BeansException;
 
@@ -256,6 +287,9 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * offers distinct, fine-grained operations for those purposes, for example
 	 * {@link #initializeBean}. However, {@link InstantiationAwareBeanPostProcessor}
 	 * callbacks are applied, if applicable to the configuration of the instance.
+	 *
+	 * 把{@link BeanDefinition#getPropertyValues()}中的值, 赋值到existingBean中
+	 *
 	 * @param existingBean the existing bean instance
 	 * @param beanName the name of the bean definition in the bean factory
 	 * (a bean definition of that name has to be available)
@@ -274,6 +308,9 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * <p>Note that no bean definition of the given name has to exist
 	 * in the bean factory. The passed-in bean name will simply be used
 	 * for callbacks but not checked against the registered bean definitions.
+	 *
+	 * 初始化bean, 执行初始化回调, 以及两个后置处理器中的方法
+	 *
 	 * @param existingBean the existing bean instance
 	 * @param beanName the name of the bean, to be passed to it if necessary
 	 * (only passed to {@link BeanPostProcessor BeanPostProcessors};
@@ -289,6 +326,9 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * Apply {@link BeanPostProcessor BeanPostProcessors} to the given existing bean
 	 * instance, invoking their {@code postProcessBeforeInitialization} methods.
 	 * The returned bean instance may be a wrapper around the original.
+	 *
+	 * 调用后置处理器{@code postProcessBeforeInitialization} methods.
+	 *
 	 * @param existingBean the existing bean instance
 	 * @param beanName the name of the bean, to be passed to it if necessary
 	 * (only passed to {@link BeanPostProcessor BeanPostProcessors};
@@ -306,6 +346,9 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * Apply {@link BeanPostProcessor BeanPostProcessors} to the given existing bean
 	 * instance, invoking their {@code postProcessAfterInitialization} methods.
 	 * The returned bean instance may be a wrapper around the original.
+	 *
+	 * 调用后置处理器{@link BeanPostProcessor BeanPostProcessors}
+	 *
 	 * @param existingBean the existing bean instance
 	 * @param beanName the name of the bean, to be passed to it if necessary
 	 * (only passed to {@link BeanPostProcessor BeanPostProcessors};
@@ -325,6 +368,9 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * registered {@link DestructionAwareBeanPostProcessor DestructionAwareBeanPostProcessors}.
 	 * <p>Any exception that arises during destruction should be caught
 	 * and logged instead of propagated to the caller of this method.
+	 *
+	 * 执行销毁相关的回调方法
+	 *
 	 * @param existingBean the bean instance to destroy
 	 */
 	void destroyBean(Object existingBean);
@@ -332,6 +378,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	//-------------------------------------------------------------------------
 	// Delegate methods for resolving injection points
+	// 解析注入点相关的方法
 	//-------------------------------------------------------------------------
 
 	/**
@@ -339,6 +386,10 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * including its bean name.
 	 * <p>This is effectively a variant of {@link #getBean(Class)} which preserves the
 	 * bean name of the matching instance.
+	 *
+	 * 查找唯一符合requiredType的实例
+	 * 底层依赖{@link BeanFactory#getBean(Class)}
+	 *
 	 * @param requiredType type the bean must match; can be an interface or superclass
 	 * @return the bean name plus bean instance
 	 * @throws NoSuchBeanDefinitionException if no matching bean was found
@@ -355,6 +406,10 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * <p>This is effectively a variant of {@link #getBean(String, Class)} which supports
 	 * factory methods with an {@link org.springframework.beans.factory.InjectionPoint}
 	 * argument.
+	 *
+	 * 根据给定名称和依赖查找
+	 * 底层依赖{@link BeanFactory#getBean(String, Class)}
+	 *
 	 * @param name the name of the bean to look up
 	 * @param descriptor the dependency descriptor for the requesting injection point
 	 * @return the corresponding bean instance
@@ -367,6 +422,9 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	/**
 	 * Resolve the specified dependency against the beans defined in this factory.
+	 *
+	 * 根据依赖和依赖名称查找
+	 *
 	 * @param descriptor the descriptor for the dependency (field/method/constructor)
 	 * @param requestingBeanName the name of the bean which declares the given dependency
 	 * @return the resolved object, or {@code null} if none found
@@ -382,10 +440,13 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	/**
 	 * Resolve the specified dependency against the beans defined in this factory.
 	 * @param descriptor the descriptor for the dependency (field/method/constructor)
+	 *                   依赖描述
 	 * @param requestingBeanName the name of the bean which declares the given dependency
 	 * @param autowiredBeanNames a Set that all names of autowired beans (used for
 	 * resolving the given dependency) are supposed to be added to
+	 *                           依赖的bean的名称
 	 * @param typeConverter the TypeConverter to use for populating arrays and collections
+	 *                      用于转换数组和列表的转换器
 	 * @return the resolved object, or {@code null} if none found
 	 * @throws NoSuchBeanDefinitionException if no matching bean was found
 	 * @throws NoUniqueBeanDefinitionException if more than one matching bean was found

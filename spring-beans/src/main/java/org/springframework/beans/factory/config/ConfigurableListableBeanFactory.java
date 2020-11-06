@@ -16,14 +16,15 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.Iterator;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.lang.Nullable;
 
+import java.util.Iterator;
+
 /**
+ * <p>配置+查下+注入功能</p>
  * Configuration interface to be implemented by most listable bean factories.
  * In addition to {@link ConfigurableBeanFactory}, it provides facilities to
  * analyze and modify bean definitions, and to pre-instantiate singletons.
@@ -45,6 +46,7 @@ public interface ConfigurableListableBeanFactory
 	/**
 	 * Ignore the given dependency type for autowiring:
 	 * for example, String. Default is none.
+	 * <p>自动装配模式下忽略这个类型的依赖</p>
 	 * @param type the dependency type to ignore
 	 */
 	void ignoreDependencyType(Class<?> type);
@@ -56,6 +58,7 @@ public interface ConfigurableListableBeanFactory
 	 * BeanFactoryAware or ApplicationContext through ApplicationContextAware.
 	 * <p>By default, only the BeanFactoryAware interface is ignored.
 	 * For further types to ignore, invoke this method for each type.
+	 * <p>自动装配模式下, 忽略这个接口的依赖</p>
 	 * @param ifc the dependency interface to ignore
 	 * @see org.springframework.beans.factory.BeanFactoryAware
 	 * @see org.springframework.context.ApplicationContextAware
@@ -70,6 +73,7 @@ public interface ConfigurableListableBeanFactory
 	 * ApplicationContext instance that the bean is living in.
 	 * <p>Note: There are no such default types registered in a plain BeanFactory,
 	 * not even for the BeanFactory interface itself.
+	 * <p>注入一个指定类型的依赖, autowiredValue不一定在容器中</p>
 	 * @param dependencyType the dependency type to register. This will typically
 	 * be a base interface such as BeanFactory, with extensions of it resolved
 	 * as well if declared as an autowiring dependency (e.g. ListableBeanFactory),
@@ -84,6 +88,7 @@ public interface ConfigurableListableBeanFactory
 	 * Determine whether the specified bean qualifies as an autowire candidate,
 	 * to be injected into other beans which declare a dependency of matching type.
 	 * <p>This method checks ancestor factories as well.
+	 * <p>判断beanName是否能被注入到descriptor指定的依赖中</p>
 	 * @param beanName the name of the bean to check
 	 * @param descriptor the descriptor of the dependency to resolve
 	 * @return whether the bean should be considered as autowire candidate
@@ -138,6 +143,7 @@ public interface ConfigurableListableBeanFactory
 	 * Freeze all bean definitions, signalling that the registered bean definitions
 	 * will not be modified or post-processed any further.
 	 * <p>This allows the factory to aggressively cache bean definition metadata.
+	 * <p>冻结所有元数据配置, 元数据不能被修改</p>
 	 */
 	void freezeConfiguration();
 
@@ -152,6 +158,7 @@ public interface ConfigurableListableBeanFactory
 	 * Ensure that all non-lazy-init singletons are instantiated, also considering
 	 * {@link org.springframework.beans.factory.FactoryBean FactoryBeans}.
 	 * Typically invoked at the end of factory setup, if desired.
+	 * <p>实例化非懒加载的单例</p>
 	 * @throws BeansException if one of the singleton beans could not be created.
 	 * Note: This may have left the factory with some beans already initialized!
 	 * Call {@link #destroySingletons()} for full cleanup in this case.

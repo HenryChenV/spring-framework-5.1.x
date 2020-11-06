@@ -11,6 +11,8 @@ public class AopApp {
 		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(AopConfig.class);
 
 
-		ac.getBean(TargetObject.class).sayHello();
+//		ac.getBean(TargetObject.class).sayHello();
+//		ac.getBean(TargetObject.class).callSayHello();
+		ac.getBean(Object.class);
 	}
 }

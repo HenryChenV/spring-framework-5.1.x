@@ -16,8 +16,6 @@
 
 package org.springframework.beans;
 
-import java.lang.reflect.Field;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -25,7 +23,13 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import java.lang.reflect.Field;
+
 /**
+ * <p>
+ *     实现了{@link TypeConverter}, 继承了{@link PropertyEditorRegistrySupport},
+ *     具有类型转换的能力, 这个能力依赖于它持有的一个{@link TypeConverterDelegate}
+ * </p>
  * Base implementation of the {@link TypeConverter} interface, using a package-private delegate.
  * Mainly serves as base class for {@link BeanWrapperImpl}.
  *

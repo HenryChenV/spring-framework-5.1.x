@@ -16,14 +16,7 @@
 
 package org.springframework.beans;
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
@@ -32,6 +25,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Extension of the standard JavaBeans {@link PropertyDescriptor} class,
@@ -71,6 +70,8 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 		super(propertyName, null, null);
 		this.beanClass = beanClass;
 
+		// 找到桥接方法对应的原始方法
+		// 原始的JavaBean内省可能因为缺少桥接方法解析没有找到setter, 再找一次
 		Method readMethodToUse = (readMethod != null ? BridgeMethodResolver.findBridgedMethod(readMethod) : null);
 		Method writeMethodToUse = (writeMethod != null ? BridgeMethodResolver.findBridgedMethod(writeMethod) : null);
 		if (writeMethodToUse == null && readMethodToUse != null) {

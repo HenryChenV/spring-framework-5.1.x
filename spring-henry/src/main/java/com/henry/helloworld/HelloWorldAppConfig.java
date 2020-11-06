@@ -1,5 +1,6 @@
 package com.henry.helloworld;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,4 +11,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ComponentScan("com.henry.helloworld")
 public class HelloWorldAppConfig {
+
+	@Bean
+	public Smile smile() {
+		return new Smile();
+	}
+
 }

@@ -16,11 +16,44 @@
 
 package org.springframework.beans;
 
-import java.beans.PropertyEditor;
-
 import org.springframework.lang.Nullable;
 
+import java.beans.PropertyEditor;
+
 /**
+ * <p>
+ * 用于注入{@link PropertyEditor}
+ * </p>
+ *
+ * <p>
+ * 关于PropertyEditor.
+ * 它是JavaBean规范定义的接口, 其设计意图是在图形化编程上, 方便对象与String之间的转换工作.
+ * Spring将其拓展，方便各种对象与Spring之间的转换工作.
+ * 例如:
+ * <ol>
+ *     <li>通过xml对Srping的Bean进行配置时, 不管Bean中的属性是何种类型, 都是直接通过String来设置的,
+ *     解析时通过拓展的{@link PropertyEditor}来转换</li>
+ *     <li>SpringMVC在解析请求参数时, 也使用到了</li>
+ * </ol>
+ * </p>
+ *
+ * <p>
+ * Spring内置的PropertyEditor
+ * @see org.springframework.beans.propertyeditors.ByteArrayPropertyEditor
+ * @see org.springframework.beans.propertyeditors.ClassEditor
+ * @see org.springframework.beans.propertyeditors.CustomBooleanEditor
+ * @see org.springframework.beans.propertyeditors.CustomCollectionEditor
+ * @see org.springframework.beans.propertyeditors.CustomDateEditor
+ * @see org.springframework.beans.propertyeditors.CustomNumberEditor
+ * @see org.springframework.beans.propertyeditors.FileEditor
+ * @see org.springframework.beans.propertyeditors.InputStreamEditor
+ * @see org.springframework.beans.propertyeditors.LocaleEditor
+ * @see org.springframework.beans.propertyeditors.PatternEditor
+ * @see org.springframework.beans.propertyeditors.PropertiesEditor
+ * @see org.springframework.beans.propertyeditors.StringTrimmerEditor
+ * @see org.springframework.beans.propertyeditors.URLEditor
+ * </p>
+ *
  * Encapsulates methods for registering JavaBeans {@link PropertyEditor PropertyEditors}.
  * This is the central interface that a {@link PropertyEditorRegistrar} operates on.
  *

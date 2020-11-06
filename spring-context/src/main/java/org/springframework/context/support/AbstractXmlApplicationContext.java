@@ -16,8 +16,6 @@
 
 package org.springframework.context.support;
 
-import java.io.IOException;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.ResourceEntityResolver;
@@ -26,7 +24,20 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 
+import java.io.IOException;
+
 /**
+ * <p>
+ *     这个类对配置加载做了进一步明确,
+ *     首先, 明确了配置的类型为xml,
+ *     其次, 明确了要通过{@link #getConfigResources()}方法来加载需要的配置自由, 但没有对这个方法做具体实现,
+ *     具体的实现在其子类中
+ *     <ol>
+ *     <li>{@link ClassPathXmlApplicationContext} 从classpath下加载配置文件</li>
+ *     <li>{@link FileSystemXmlApplicationContext} 基于url的格式加载配置文件</li>
+ *     </ol>
+ * </p>
+ *
  * Convenient base class for {@link org.springframework.context.ApplicationContext}
  * implementations, drawing configuration from XML documents containing bean definitions
  * understood by an {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader}.
@@ -45,6 +56,9 @@ import org.springframework.lang.Nullable;
  */
 public abstract class AbstractXmlApplicationContext extends AbstractRefreshableConfigApplicationContext {
 
+	/**
+	 * 是否进行xml校验
+	 */
 	private boolean validating = true;
 
 

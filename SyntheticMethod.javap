@@ -1,0 +1,128 @@
+Classfile /Users/henry/projects/henry/spring/spring-framework-5.1.x/spring-henry/out/production/classes/com/henry/synthetic/SyntheticMethod.class
+  Last modified 2020-10-11; size 1198 bytes
+  MD5 checksum b576ae471494e2905a9ad612a855487c
+  Compiled from "SyntheticMethod.java"
+public class com.henry.synthetic.SyntheticClassAndMethod
+  minor version: 0
+  major version: 52
+  flags: ACC_PUBLIC, ACC_SUPER
+Constant pool:
+   #1 = Methodref          #10.#33        // java/lang/Object."<init>":()V
+   #2 = Class              #34            // com/henry/synthetic/SyntheticMethod$Inner
+   #3 = Methodref          #2.#35         // com/henry/synthetic/SyntheticMethod$Inner."<init>":(Lcom/henry/synthetic/SyntheticMethod;)V
+   #4 = Fieldref           #36.#37        // java/lang/System.out:Ljava/io/PrintStream;
+   #5 = Methodref          #2.#38         // com/henry/synthetic/SyntheticMethod$Inner.access$000:(Lcom/henry/synthetic/SyntheticMethod$Inner;)I
+   #6 = Methodref          #39.#40        // java/io/PrintStream.println:(I)V
+   #7 = Methodref          #41.#42        // java/lang/Class.getDeclaredMethods:()[Ljava/lang/reflect/Method;
+   #8 = Methodref          #39.#43        // java/io/PrintStream.println:(Ljava/lang/Object;)V
+   #9 = Class              #44            // com/henry/synthetic/SyntheticMethod
+  #10 = Class              #45            // java/lang/Object
+  #11 = Utf8               Inner
+  #12 = Utf8               InnerClasses
+  #13 = Utf8               <init>
+  #14 = Utf8               ()V
+  #15 = Utf8               Code
+  #16 = Utf8               LineNumberTable
+  #17 = Utf8               LocalVariableTable
+  #18 = Utf8               this
+  #19 = Utf8               Lcom/henry/synthetic/SyntheticMethod;
+  #20 = Utf8               print
+  #21 = Utf8               inner
+  #22 = Utf8               Lcom/henry/synthetic/SyntheticMethod$Inner;
+  #23 = Utf8               main
+  #24 = Utf8               ([Ljava/lang/String;)V
+  #25 = Utf8               declaredMethod
+  #26 = Utf8               Ljava/lang/reflect/Method;
+  #27 = Utf8               args
+  #28 = Utf8               [Ljava/lang/String;
+  #29 = Utf8               StackMapTable
+  #30 = Class              #46            // "[Ljava/lang/reflect/Method;"
+  #31 = Utf8               SourceFile
+  #32 = Utf8               SyntheticMethod.java
+  #33 = NameAndType        #13:#14        // "<init>":()V
+  #34 = Utf8               com/henry/synthetic/SyntheticMethod$Inner
+  #35 = NameAndType        #13:#47        // "<init>":(Lcom/henry/synthetic/SyntheticMethod;)V
+  #36 = Class              #48            // java/lang/System
+  #37 = NameAndType        #49:#50        // out:Ljava/io/PrintStream;
+  #38 = NameAndType        #51:#52        // access$000:(Lcom/henry/synthetic/SyntheticMethod$Inner;)I
+  #39 = Class              #53            // java/io/PrintStream
+  #40 = NameAndType        #54:#55        // println:(I)V
+  #41 = Class              #56            // java/lang/Class
+  #42 = NameAndType        #57:#58        // getDeclaredMethods:()[Ljava/lang/reflect/Method;
+  #43 = NameAndType        #54:#59        // println:(Ljava/lang/Object;)V
+  #44 = Utf8               com/henry/synthetic/SyntheticMethod
+  #45 = Utf8               java/lang/Object
+  #46 = Utf8               [Ljava/lang/reflect/Method;
+  #47 = Utf8               (Lcom/henry/synthetic/SyntheticMethod;)V
+  #48 = Utf8               java/lang/System
+  #49 = Utf8               out
+  #50 = Utf8               Ljava/io/PrintStream;
+  #51 = Utf8               access$000
+  #52 = Utf8               (Lcom/henry/synthetic/SyntheticMethod$Inner;)I
+  #53 = Utf8               java/io/PrintStream
+  #54 = Utf8               println
+  #55 = Utf8               (I)V
+  #56 = Utf8               java/lang/Class
+  #57 = Utf8               getDeclaredMethods
+  #58 = Utf8               ()[Ljava/lang/reflect/Method;
+  #59 = Utf8               (Ljava/lang/Object;)V
+{
+  public com.henry.synthetic.SyntheticClassAndMethod();
+    descriptor: ()V
+    flags: ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         4: return
+      LineNumberTable:
+        line 9: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/henry/synthetic/SyntheticMethod;
+
+  public static void main(java.lang.String[]);
+    descriptor: ([Ljava/lang/String;)V
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=5, args_size=1
+         0: ldc           #2                  // class com/henry/synthetic/SyntheticMethod$Inner
+         2: invokevirtual #7                  // Method java/lang/Class.getDeclaredMethods:()[Ljava/lang/reflect/Method;
+         5: astore_1
+         6: aload_1
+         7: arraylength
+         8: istore_2
+         9: iconst_0
+        10: istore_3
+        11: iload_3
+        12: iload_2
+        13: if_icmpge     35
+        16: aload_1
+        17: iload_3
+        18: aaload
+        19: astore        4
+        21: getstatic     #4                  // Field java/lang/System.out:Ljava/io/PrintStream;
+        24: aload         4
+        26: invokevirtual #8                  // Method java/io/PrintStream.println:(Ljava/lang/Object;)V
+        29: iinc          3, 1
+        32: goto          11
+        35: return
+      LineNumberTable:
+        line 21: 0
+        line 22: 21
+        line 21: 29
+        line 24: 35
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+           21       8     4 declaredMethod   Ljava/lang/reflect/Method;
+            0      36     0  args   [Ljava/lang/String;
+      StackMapTable: number_of_entries = 2
+        frame_type = 254 /* append */
+          offset_delta = 11
+          locals = [ class "[Ljava/lang/reflect/Method;", int, int ]
+        frame_type = 248 /* chop */
+          offset_delta = 23
+}
+SourceFile: "SyntheticMethod.java"
+InnerClasses:
+     #11= #2 of #9; //Inner=class com/henry/synthetic/SyntheticMethod$Inner of class com/henry/synthetic/SyntheticMethod

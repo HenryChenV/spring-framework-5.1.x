@@ -16,17 +16,16 @@
 
 package org.springframework.context.event;
 
-import java.util.concurrent.Executor;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
+
+import java.util.concurrent.Executor;
 
 /**
  * Simple implementation of the {@link ApplicationEventMulticaster} interface.
@@ -129,9 +128,25 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 
 	@Override
 	public void multicastEvent(final ApplicationEvent event, @Nullable ResolvableType eventType) {
+		// 推断事件类型
 		ResolvableType type = (eventType != null ? eventType : resolveDefaultEventType(event));
+		// 用于异步执行
 		Executor executor = getTaskExecutor();
+		// 获取监听器
+		/**
+		 * Q&A 监听器在哪里注册的
+		 * A:
+		 *  监听器可以通过实现ApplicationListener接口, 或者加@EventListener注解实现
+		 *
+		 *  对于接口的方式, 在{@link ApplicationListenerDetector#postProcessAfterInitialization}注册
+		 *
+		 *  对于注解的方式, 在{@link EventListenerMethodProcessor#afterSingletonsInstantiated}
+		 *  -> {@link EventListenerMethodProcessor#processBean}中
+		 *  会先将注解的方法封装成{@link ApplicationListenerMethodAdapter}, 这个类继承了{@link ApplicationListener}
+		 *  然后注册
+		 */
 		for (ApplicationListener<?> listener : getApplicationListeners(event, type)) {
+			// 执行监听器逻辑
 			if (executor != null) {
 				executor.execute(() -> invokeListener(listener, event));
 			}

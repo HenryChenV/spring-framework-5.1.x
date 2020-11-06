@@ -16,26 +16,15 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.BeanCreationNotAllowedException;
-import org.springframework.beans.factory.BeanCurrentlyInCreationException;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.*;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.core.SimpleAliasRegistry;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Generic registry for shared bean instances, implementing the
@@ -153,8 +142,35 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	protected void addSingletonFactory(String beanName, ObjectFactory<?> singletonFactory) {
 		Assert.notNull(singletonFactory, "Singleton factory must not be null");
+		/** 加锁, 锁的一级缓存{@link singletonObjects} */
 		synchronized (this.singletonObjects) {
+			/**
+			 * {@link singletonObjects}不存在才会放入
+			 * 很显然, 如果{@link singletonObjects} 存在,
+			 * 说明这个bean已经是一个完全的bean了, 这一步操作是过期的
+			 */
 			if (!this.singletonObjects.containsKey(beanName)) {
+				/**
+				 * 将bean放入 {@link singletonFactories}
+				 * 同时从 {@link earlySingletonObjects} 中移除
+				 *
+				 * Q&A henry 为什么不先从 earlySingletonObjects 中取
+				 * Q: 没明白这里为什么不判断 {@link earlySingletonObjects} 有没有,
+				 * 如果没有再写入 {@link singletonFactories}
+				 * 而是用简单粗暴的方式保证beanName
+				 * 只在{@link earlySingletonObjects}或者{@link singletonFactories}中
+				 *
+				 * A: 因为在 {@link this#getSingleton(String, boolean)} 中,
+				 * 在用工厂生产bean加入到{@link earlySingletonObjects}后,
+				 * 就会将工厂从 {@link singletonFactories} 中移除
+				 * 这个过程不可逆
+				 *
+				 *
+				 * Q&A TODO 为什么二级缓存 singletonFactories 是个工厂
+				 * Q: 为什么二级缓存是个工厂, 不直接存bean呢,
+				 * 而且这样可以直接放到 {@link earlySingletonObjects} 中,
+				 * 直接 {@link singletonFactories} 干掉
+				 */
 				this.singletonFactories.put(beanName, singletonFactory);
 				this.earlySingletonObjects.remove(beanName);
 				this.registeredSingletons.add(beanName);
@@ -179,6 +195,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	@Nullable
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
 		// Quick check for existing instance without full singleton lock
+		// 1. 从singletonObjects中获取
 		Object singletonObject = this.singletonObjects.get(beanName);
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
 			singletonObject = this.earlySingletonObjects.get(beanName);
@@ -187,10 +204,25 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					// Consistent creation of early reference within full singleton lock
 					singletonObject = this.singletonObjects.get(beanName);
 					if (singletonObject == null) {
+						// 2. 从earlySingletonObjects中获取
 						singletonObject = this.earlySingletonObjects.get(beanName);
 						if (singletonObject == null) {
+							// 3. 从singletonFactories的singletonFactory生成bean, 并完成一些初始化,
+							// 		放到earlySingletonObjects中, 并从singletonFactories中移除
 							ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
 							if (singletonFactory != null) {
+								/**
+								 * 1. 从工厂产生bean
+								 * 2. 放到 {@link earlySingletonObjects} 中
+								 * 3. 并从 {@link singletonFactories} 中移除
+								 *
+								 * Q&A 为什么放入 earlySingletonObjects 的同时要从 singletonFactories 中移除
+								 * A: 这样就能保证不会重复从工厂产生再放到{@link earlySingletonObjects}中了
+								 * 因为{@link singletonFactories}中的被移除了
+								 * 上面1~3的过程不可逆, 保证每个工厂只被调用一次
+								 *
+								 * 另外有人说是gc, 我觉得不是主要原因
+								 */
 								singletonObject = singletonFactory.getObject();
 								this.earlySingletonObjects.put(beanName, singletonObject);
 								this.singletonFactories.remove(beanName);
@@ -206,6 +238,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/**
 	 * Return the (raw) singleton object registered under the given name,
 	 * creating and registering a new one if none registered yet.
+	 *
+	 * 创建单例
 	 * @param beanName the name of the bean
 	 * @param singletonFactory the ObjectFactory to lazily create the singleton
 	 * with, if necessary
@@ -224,6 +258,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				if (logger.isDebugEnabled()) {
 					logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
 				}
+				/** 当前beanName加到{@link singletonsCurrentlyInCreation}中 */
 				beforeSingletonCreation(beanName);
 				boolean newSingleton = false;
 				boolean recordSuppressedExceptions = (this.suppressedExceptions == null);
@@ -231,7 +266,28 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					this.suppressedExceptions = new LinkedHashSet<>();
 				}
 				try {
+					/**
+					 * 实际创建bean
+					 * 传入{@link singletonFactory}的代码
+					 * <pre>
+					 * sharedInstance = getSingleton(beanName, () -> {
+					 *     try {
+					 *         return createBean(beanName, mbd, args);
+					 * 	   }
+					 * 	   catch (BeansException ex) {
+					 *         // Explicitly remove instance from singleton cache: It might have been put there
+					 *         // eagerly by the creation process, to allow for circular reference resolution.
+					 *         // Also remove any beans that received a temporary reference to the bean.
+					 *         destroySingleton(beanName);
+					 * 	       throw ex;
+					 *     }
+					 * });
+					 * 也就是
+					 * {@link AbstractAutowireCapableBeanFactory#createBean(java.lang.String, org.springframework.beans.factory.support.RootBeanDefinition, java.lang.Object[])}
+					 * </pre>
+					 */
 					singletonObject = singletonFactory.getObject();
+					/** 设置为true后, 后面会加到{@link singletonObjects}中 */
 					newSingleton = true;
 				}
 				catch (IllegalStateException ex) {
@@ -254,6 +310,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					if (recordSuppressedExceptions) {
 						this.suppressedExceptions = null;
 					}
+					/** 当前beanName从{@link singletonsCurrentlyInCreation}中移除 */
 					afterSingletonCreation(beanName);
 				}
 				if (newSingleton) {

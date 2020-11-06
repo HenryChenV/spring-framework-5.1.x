@@ -21,11 +21,13 @@ public class LogMeAspect {
 
 	@Around("logMePointcut()")
 	public Object logAround(ProceedingJoinPoint pjp) throws Throwable {
-		System.out.println("^-^ log before >>>>>>>>>>>>>>>>>>>>>>>>>>");
+		String methodName = pjp.getSignature().getName();
+
+		System.out.println("^-^ log before " + methodName + " >>>>>>>>>>>>>>>>>>>>>>>>>>");
 
 		Object retVal = pjp.proceed();
 
-		System.out.println("^-^ log after <<<<<<<<<<<<<<<<<<<<<<<<<<<");
+		System.out.println("^-^ log after " + methodName + " <<<<<<<<<<<<<<<<<<<<<<<<<<<");
 
 		return retVal;
 	}

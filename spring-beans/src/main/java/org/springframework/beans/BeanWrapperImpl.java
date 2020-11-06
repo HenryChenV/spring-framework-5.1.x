@@ -16,21 +16,30 @@
 
 package org.springframework.beans;
 
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.Property;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
+import java.security.*;
+
 /**
+ * <p>
+ * {@link BeanWrapper}的唯一实现类
+ *
+ * 实现了如下功能:
+ * <ol>
+ *     <li>对Bean进行包装</li>
+ *     <li>对Bean的属性进行访问以及设置</li>
+ *     <li>在需要的时候做类型转换</li>
+ * </ol>
+ *
+ * 这里需要点内省的知识, 内省的例子可以参考:
+ * @see com.henry.java.introspector.IntrospectorTest
+ * </p>
  * Default {@link BeanWrapper} implementation that should be sufficient
  * for all typical use cases. Caches introspection results for efficiency.
  *
@@ -63,6 +72,7 @@ import org.springframework.util.ReflectionUtils;
 public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements BeanWrapper {
 
 	/**
+	 * 缓存内省的结果
 	 * Cached introspections results for this object, to prevent encountering
 	 * the cost of JavaBeans introspection every time.
 	 */
@@ -144,6 +154,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	public void setBeanInstance(Object object) {
 		this.wrappedObject = object;
 		this.rootObject = object;
+		// 进行类型转换的对象
 		this.typeConverterDelegate = new TypeConverterDelegate(this, this.wrappedObject);
 		setIntrospectionClass(object.getClass());
 	}
@@ -171,6 +182,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	 */
 	private CachedIntrospectionResults getCachedIntrospectionResults() {
 		if (this.cachedIntrospectionResults == null) {
+			// 底层使用了内省机制
 			this.cachedIntrospectionResults = CachedIntrospectionResults.forClass(getWrappedClass());
 		}
 		return this.cachedIntrospectionResults;

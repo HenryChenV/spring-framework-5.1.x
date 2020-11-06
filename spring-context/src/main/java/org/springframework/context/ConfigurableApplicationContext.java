@@ -16,8 +16,6 @@
 
 package org.springframework.context;
 
-import java.io.Closeable;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -26,7 +24,14 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ProtocolResolver;
 import org.springframework.lang.Nullable;
 
+import java.io.Closeable;
+
 /**
+ *
+ * <p>
+ *     在{@link ApplicationContext}基础上增加了配置的方法
+ * </p>
+ *
  * SPI interface to be implemented by most if not all application contexts.
  * Provides facilities to configure an application context in addition
  * to the application context client methods in the
@@ -42,6 +47,8 @@ import org.springframework.lang.Nullable;
  */
 public interface ConfigurableApplicationContext extends ApplicationContext, Lifecycle, Closeable {
 
+	// region 配置路径的分隔符
+
 	/**
 	 * Any number of these characters are considered delimiters between
 	 * multiple context config paths in a single String value.
@@ -50,6 +57,8 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @see org.springframework.web.servlet.FrameworkServlet#setContextConfigLocation
 	 */
 	String CONFIG_LOCATION_DELIMITERS = ",; \t\n";
+
+	// endregion
 
 	/**
 	 * Name of the ConversionService bean in the factory.
@@ -89,6 +98,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 
 	/**
 	 * Set the unique id of this application context.
+	 * <p>容器上下文唯一的ID</p>
 	 * @since 3.0
 	 */
 	void setId(String id);
@@ -98,10 +108,13 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * <p>Note that the parent shouldn't be changed: It should only be set outside
 	 * a constructor if it isn't available when an object of this class is created,
 	 * for example in case of WebApplicationContext setup.
+	 * <p>设置父容器, 设置了就不能改了</p>
 	 * @param parent the parent context
 	 * @see org.springframework.web.context.ConfigurableWebApplicationContext
 	 */
 	void setParent(@Nullable ApplicationContext parent);
+
+	// region Environment
 
 	/**
 	 * Set the {@code Environment} for this application context.
@@ -117,6 +130,8 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 */
 	@Override
 	ConfigurableEnvironment getEnvironment();
+
+	// endregion
 
 	/**
 	 * Add a new BeanFactoryPostProcessor that will get applied to the internal
@@ -143,9 +158,12 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * allowing for additional resource protocols to be handled.
 	 * <p>Any such resolver will be invoked ahead of this context's standard
 	 * resolution rules. It may therefore also override any default rules.
+	 * <p>注册协议解析器, 解析其他协议</p>
 	 * @since 4.3
 	 */
 	void addProtocolResolver(ProtocolResolver resolver);
+
+	// region 容器启动
 
 	/**
 	 * Load or refresh the persistent representation of the configuration, which
@@ -154,11 +172,18 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * <p>As this is a startup method, it should destroy already created singletons
 	 * if it fails, to avoid dangling resources. In other words, after invocation
 	 * of this method, either all or no singletons at all should be instantiated.
+	 * <p>
+	 *     最重要的一个方法, 加载或者刷新配置, 配置可以是xml的, Java配置的, 或者properties file, 数据库的等等
+	 * </p>
 	 * @throws BeansException if the bean factory could not be initialized
 	 * @throws IllegalStateException if already initialized and multiple refresh
 	 * attempts are not supported
 	 */
 	void refresh() throws BeansException, IllegalStateException;
+
+	// endregion
+
+	// region 容器关闭
 
 	/**
 	 * Register a shutdown hook with the JVM runtime, closing this context
@@ -167,6 +192,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * (at max) will be registered for each context instance.
 	 * @see java.lang.Runtime#addShutdownHook
 	 * @see #close()
+	 * <p>JVM运行时注册一个hook, JVM关闭时回回调, 实现容器的关闭</p>
 	 */
 	void registerShutdownHook();
 
@@ -177,9 +203,12 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * parent contexts have their own, independent lifecycle.
 	 * <p>This method can be called multiple times without side effects: Subsequent
 	 * {@code close} calls on an already closed context will be ignored.
+	 * <p>关闭容器, 同时释放资源</p>
 	 */
 	@Override
 	void close();
+
+	// endregion
 
 	/**
 	 * Determine whether this application context is active, that is,
@@ -188,6 +217,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @see #refresh()
 	 * @see #close()
 	 * @see #getBeanFactory()
+	 * <p>容器是否被激活, refresh后被激活, 而且只能refresh一次</p>
 	 */
 	boolean isActive();
 
@@ -209,6 +239,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @see #refresh()
 	 * @see #close()
 	 * @see #addBeanFactoryPostProcessor
+	 * <p>注意这里返回的工厂是{@link ConfigurableListableBeanFactory}类型的</p>
 	 */
 	ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException;
 

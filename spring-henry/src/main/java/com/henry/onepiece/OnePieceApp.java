@@ -16,6 +16,8 @@ public class OnePieceApp {
 		ac.refresh();
 
 		System.out.println(ac.getBean(OrangeTree.class));
+		System.out.println(ac.getBean(OnePiece.class).getLuffy());
+		System.out.println(ac.getBean(OnePiece.class).getZoro());
 	}
 
 }

@@ -13,7 +13,23 @@ public class OnePiece {
 	@Autowired
 	private Luffy luffy;
 
-	@Autowired
 	private Zoro zoro;
 
+	public void setLuffy(Luffy luffy) {
+		System.out.println("setLuffy " + luffy);
+		this.luffy = luffy;
+	}
+
+	public void setZoro(Zoro zoro) {
+		System.out.println("setZoro");
+		this.zoro = zoro;
+	}
+
+	public Luffy getLuffy() {
+		return luffy;
+	}
+
+	public Zoro getZoro() {
+		return zoro;
+	}
 }

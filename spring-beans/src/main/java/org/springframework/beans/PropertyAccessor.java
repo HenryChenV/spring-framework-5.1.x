@@ -16,12 +16,16 @@
 
 package org.springframework.beans;
 
-import java.util.Map;
-
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 
+import java.util.Map;
+
 /**
+ * <p>
+ * 属性访问器
+ * </p>
+ *
  * Common interface for classes that can access named properties
  * (such as bean properties of an object or fields in an object)
  * Serves as base interface for {@link BeanWrapper}.
@@ -34,6 +38,8 @@ import org.springframework.lang.Nullable;
  */
 public interface PropertyAccessor {
 
+	// region 嵌套属性访问符
+
 	/**
 	 * Path separator for nested properties.
 	 * Follows normal Java conventions: getFoo().getBar() would be "foo.bar".
@@ -45,6 +51,10 @@ public interface PropertyAccessor {
 	 * Follows normal Java conventions: getFoo().getBar() would be "foo.bar".
 	 */
 	char NESTED_PROPERTY_SEPARATOR_CHAR = '.';
+
+	// endregion
+
+	// region index访问相关
 
 	/**
 	 * Marker that indicates the start of a property key for an
@@ -69,6 +79,8 @@ public interface PropertyAccessor {
 	 * indexed or mapped property like "person.addresses[0]".
 	 */
 	char PROPERTY_KEY_SUFFIX_CHAR = ']';
+
+	// endregion
 
 
 	/**

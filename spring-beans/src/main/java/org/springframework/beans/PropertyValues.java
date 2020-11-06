@@ -16,6 +16,8 @@
 
 package org.springframework.beans;
 
+import org.springframework.lang.Nullable;
+
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Spliterator;
@@ -23,9 +25,11 @@ import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.springframework.lang.Nullable;
-
 /**
+ * <p>
+ * 用来封装要赋值给bean的属性值
+ * </p>
+ *
  * Holder containing one or more {@link PropertyValue} objects,
  * typically comprising one update for a specific target bean.
  *

@@ -19,6 +19,15 @@ package org.springframework.beans;
 import java.beans.PropertyDescriptor;
 
 /**
+ * <p>
+ * Spring中低级JavaBean基础设置的接口.
+ * 通常并不会直接使用,
+ * 而是通过{@link org.springframework.beans.factory.BeanFactory}
+ * 或者{@link org.springframework.validation.DataBinder}使用.
+ * 为的是更方便的操作Bean中的属性.
+ * 其实现只有一个{@link BeanWrapperImpl}.
+ * </p>
+ *
  * The central interface of Spring's low-level JavaBeans infrastructure.
  *
  * <p>Typically not used directly but rather implicitly via a

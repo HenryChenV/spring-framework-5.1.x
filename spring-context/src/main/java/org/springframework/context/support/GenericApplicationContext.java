@@ -16,11 +16,6 @@
 
 package org.springframework.context.support;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -39,7 +34,18 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
+
 /**
+ *
+ * <p>
+ * 这个类已经不是抽象类了, 可以直接使用, 但是使用起来很麻烦, 因为它不能读取配置, 需要我们手动去指定读取的方式和位置,
+ * 使用姿势见下面英文注释中的代码. 开发中谁会用到这么个东西啊
+ * </p>
+ *
  * Generic ApplicationContext implementation that holds a single internal
  * {@link org.springframework.beans.factory.support.DefaultListableBeanFactory}
  * instance and does not assume a specific bean definition format. Implements
@@ -457,10 +463,14 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 		@Nullable
 		public Constructor<?>[] getPreferredConstructors() {
 			Class<?> clazz = getBeanClass();
+
+			// 这个对于纯Java代码, 肯定是null
 			Constructor<?> primaryCtor = BeanUtils.findPrimaryConstructor(clazz);
 			if (primaryCtor != null) {
 				return new Constructor<?>[] {primaryCtor};
 			}
+
+			// 返回所有public的构造方法
 			Constructor<?>[] publicCtors = clazz.getConstructors();
 			if (publicCtors.length > 0) {
 				return publicCtors;

@@ -34,6 +34,7 @@ import org.springframework.lang.Nullable;
 public interface ConfigurablePropertyAccessor extends PropertyAccessor, PropertyEditorRegistry, TypeConverter {
 
 	/**
+	 * 进行转换的业务类
 	 * Specify a Spring 3.0 ConversionService to use for converting
 	 * property values, as an alternative to JavaBeans PropertyEditors.
 	 */
@@ -58,6 +59,9 @@ public interface ConfigurablePropertyAccessor extends PropertyAccessor, Property
 	boolean isExtractOldValueForEditor();
 
 	/**
+	 * 对于{@code dog.name}这嵌套属性的情况下, 如果{@code dog}为null.
+	 * autoGrowNestedPath=true不会抛错
+	 * autoGrowNestedPath=false会抛出{@link NullValueInNestedPathException}
 	 * Set whether this instance should attempt to "auto-grow" a
 	 * nested path that contains a {@code null} value.
 	 * <p>If {@code true}, a {@code null} path location will be populated

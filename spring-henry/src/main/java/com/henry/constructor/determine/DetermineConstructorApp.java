@@ -1,16 +1,13 @@
-package com.henry.determine.constructor;
+package com.henry.constructor.determine;
 
+import org.junit.Test;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -31,9 +28,28 @@ class MultiConstructor {
 	public MultiConstructor(Integer id, String name) {
 		System.out.println("init with constructor (Integer,String)" + getClass().getSimpleName());
 	}
-
-
 }
+
+/**
+ * 三个有参构造方法Srping推断出来都不合适, 会使用无参构造方法,
+ * 但是无参构造方法没提供, 所以报错
+ */
+class WrongConstructor {
+
+	public WrongConstructor(Integer id) {
+		System.out.println("init with constructor (Integer)" + getClass().getSimpleName());
+	}
+
+	public WrongConstructor(String name) {
+		System.out.println("init with constructor (String)" + getClass().getSimpleName());
+	}
+
+	public WrongConstructor(Integer id, String name) {
+		System.out.println("init with constructor (Integer,String)" + getClass().getSimpleName());
+	}
+}
+
+
 @Component
 class MultiConstructorAutowiredFalse {
 
@@ -90,11 +106,14 @@ class HackedAutoWiredModeBeanFactoryPostProcessor implements BeanFactoryPostProc
  * @date created at 2020/10/11 9:47 下午
  */
 public class DetermineConstructorApp {
-	public static void main(String[] args) {
+
+	@Test
+	public void testDetermineConstructor() {
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
 
-		applicationContext.scan("com.henry.determine.constructor");
+		applicationContext.scan("com.henry.constructor.determine");
 
 		applicationContext.refresh();
 	}
+
 }

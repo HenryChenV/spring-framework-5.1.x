@@ -16,9 +16,6 @@
 
 package org.springframework.beans.factory.config;
 
-import java.beans.PropertyEditor;
-import java.security.AccessControlContext;
-
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.TypeConverter;
@@ -29,6 +26,9 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
+
+import java.beans.PropertyEditor;
+import java.security.AccessControlContext;
 
 /**
  * Configuration interface to be implemented by most bean factories. Provides
@@ -69,12 +69,17 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * Set the parent of this bean factory.
 	 * <p>Note that the parent cannot be changed: It should only be set outside
 	 * a constructor if it isn't available at the time of factory instantiation.
+	 *
+	 * 设置父beanFactory, 一旦设置不可改变
+	 *
 	 * @param parentBeanFactory the parent BeanFactory
 	 * @throws IllegalStateException if this factory is already associated with
 	 * a parent BeanFactory
 	 * @see #getParentBeanFactory()
 	 */
 	void setParentBeanFactory(BeanFactory parentBeanFactory) throws IllegalStateException;
+
+	// region classLoader
 
 	/**
 	 * Set the class loader to use for loading bean classes.
@@ -103,6 +108,9 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * <i>load-time weaving</i> is involved, to make sure that actual bean
 	 * classes are loaded as lazily as possible. The temporary loader is
 	 * then removed once the BeanFactory completes its bootstrap phase.
+	 *
+	 * 设置临时类加载器, 在类加载使其织入时会用到(load-time-weaving), beanFactory启动完成后会移除
+	 *
 	 * @since 2.5
 	 */
 	void setTempClassLoader(@Nullable ClassLoader tempClassLoader);
@@ -115,12 +123,17 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	@Nullable
 	ClassLoader getTempClassLoader();
 
+	// endregion
+
+	// region bean元信息缓存
+
 	/**
 	 * Set whether to cache bean metadata such as given bean definitions
 	 * (in merged fashion) and resolved bean classes. Default is on.
 	 * <p>Turn this flag off to enable hot-refreshing of bean definition objects
 	 * and in particular bean classes. If this flag is off, any creation of a bean
 	 * instance will re-query the bean class loader for newly resolved classes.
+	 * 是否对beanDefinition进行缓存
 	 */
 	void setCacheBeanMetadata(boolean cacheBeanMetadata);
 
@@ -130,11 +143,18 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 */
 	boolean isCacheBeanMetadata();
 
+	// endregion
+
+	// region bean表达式解析器
+
 	/**
 	 * Specify the resolution strategy for expressions in bean definition values.
 	 * <p>There is no expression support active in a BeanFactory by default.
 	 * An ApplicationContext will typically set a standard expression strategy
 	 * here, supporting "#{...}" expressions in a Unified EL compatible style.
+	 *
+	 * BeanDefinition表达式解析器
+	 *
 	 * @since 3.0
 	 */
 	void setBeanExpressionResolver(@Nullable BeanExpressionResolver resolver);
@@ -145,6 +165,10 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 */
 	@Nullable
 	BeanExpressionResolver getBeanExpressionResolver();
+
+	// endregion
+
+	// region 数据转换相关
 
 	/**
 	 * Specify a Spring 3.0 ConversionService to use for converting
@@ -209,8 +233,11 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 */
 	TypeConverter getTypeConverter();
 
+	// endregion
+
 	/**
 	 * Add a String resolver for embedded values such as annotation attributes.
+	 * 值解析器, 可以用来解析占位符
 	 * @param valueResolver the String resolver to apply to embedded values
 	 * @since 3.0
 	 */
@@ -232,6 +259,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	@Nullable
 	String resolveEmbeddedValue(String value);
 
+	// region bean 后置处理器
+
 	/**
 	 * Add a new BeanPostProcessor that will get applied to beans created
 	 * by this factory. To be invoked during factory configuration.
@@ -248,6 +277,10 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * Return the current number of registered BeanPostProcessors, if any.
 	 */
 	int getBeanPostProcessorCount();
+
+	// endregion
+
+	// region scope
 
 	/**
 	 * Register the given scope, backed by the given Scope implementation.
@@ -276,6 +309,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	@Nullable
 	Scope getRegisteredScope(String scopeName);
 
+	// endregion
+
 	/**
 	 * Provides a security access control context relevant to this factory.
 	 * @return the applicable AccessControlContext (never {@code null})
@@ -289,9 +324,12 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * BeanPostProcessors, Scopes, and factory-specific internal settings.
 	 * Should not include any metadata of actual bean definitions,
 	 * such as BeanDefinition objects and bean name aliases.
+	 * 从另一个beanFactory中拷贝配置, 仅仅是配置, 不包括beanDefinition
 	 * @param otherFactory the other BeanFactory to copy from
 	 */
 	void copyConfigurationFrom(ConfigurableBeanFactory otherFactory);
+
+	// region 别名
 
 	/**
 	 * Given a bean name, create an alias. We typically use this method to
@@ -315,6 +353,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 */
 	void resolveAliases(StringValueResolver valueResolver);
 
+	// endregion
+
 	/**
 	 * Return a merged BeanDefinition for the given bean name,
 	 * merging a child bean definition with its parent if necessary.
@@ -336,6 +376,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 */
 	boolean isFactoryBean(String name) throws NoSuchBeanDefinitionException;
 
+	// bean是否在创建中, 循环依赖会用到
+
 	/**
 	 * Explicitly control the current in-creation status of the specified bean.
 	 * For container-internal use only.
@@ -353,9 +395,14 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 */
 	boolean isCurrentlyInCreation(String beanName);
 
+	// endregion
+
+	// region 依赖相关
+
 	/**
 	 * Register a dependent bean for the given bean,
 	 * to be destroyed before the given bean is destroyed.
+	 * 注册一bean的依赖关系, 在销毁时, 依赖bean会先销毁
 	 * @param beanName the name of the bean
 	 * @param dependentBeanName the name of the dependent bean
 	 * @since 2.5
@@ -379,6 +426,10 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 */
 	String[] getDependenciesForBean(String beanName);
 
+	// endregion
+
+	// region bean的销毁
+
 	/**
 	 * Destroy the given bean instance (usually a prototype instance
 	 * obtained from this factory) according to its bean definition.
@@ -393,6 +444,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * Destroy the specified scoped bean in the current target scope, if any.
 	 * <p>Any exception that arises during destruction should be caught
 	 * and logged instead of propagated to the caller of this method.
+	 * 先从scope中移除, 再销毁bean
 	 * @param beanName the name of the scoped bean
 	 */
 	void destroyScopedBean(String beanName);
@@ -404,5 +456,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * and logged instead of propagated to the caller of this method.
 	 */
 	void destroySingletons();
+
+	// endregion
 
 }

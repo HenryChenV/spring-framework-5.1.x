@@ -16,8 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.util.function.Supplier;
-
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -26,7 +24,16 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import java.util.function.Supplier;
+
 /**
+ * <p>
+ *     基于注解的配置的ApplicationContext.
+ *     使用{@link Configuration}注解配置类即可, 很方便.
+ *     内部会通过{@link AnnotatedBeanDefinitionReader}注册配置类,
+ *     {@link ClassPathBeanDefinitionScanner}扫描配置类上申明的路径, 得到所有BeanDefinition.
+ * </p>
+ *
  * Standalone application context, accepting <em>component classes</em> as input &mdash;
  * in particular {@link Configuration @Configuration}-annotated classes, but also plain
  * {@link org.springframework.stereotype.Component @Component} types and JSR-330 compliant
@@ -63,7 +70,13 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * through {@link #register} calls and then manually {@linkplain #refresh refreshed}.
 	 */
 	public AnnotationConfigApplicationContext() {
+		/**
+		 * 用于解析配置类
+		 * 会注册6个processor，其中包括 {@link ConfigurationClassPostProcessor}
+		 */
 		this.reader = new AnnotatedBeanDefinitionReader(this);
+
+		// 用于扫描类
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
 
@@ -85,7 +98,18 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 */
 	public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
 		this();
+
+		// 注册配置类
+		// 将配置类 -> AnnotatedBeanDefinition
+		//
+		// 为什么不直接扫描配置类？
+		// 因为没法被扫描到，扫描的前提是直到扫描什么地方，而扫描什么地方是配置在配置类上的
+		// 现有配置类，才知道扫什么地方，所以配置类只能传入
+		//
+		// 为什么提供register这个API?
+		// 方便程序员动态添加配置类，而不用关心配置类变成AnnotatedBeanDefinition的细节
 		register(componentClasses);
+
 		refresh();
 	}
 
@@ -157,6 +181,10 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	@Override
 	public void register(Class<?>... componentClasses) {
 		Assert.notEmpty(componentClasses, "At least one component class must be specified");
+		/**
+		 * 将componentClasses包装成{@link org.springframework.beans.factory.annotation.AnnotatedBeanDefinition}
+		 * 然后注册到beanFactory中
+		 */
 		this.reader.register(componentClasses);
 	}
 

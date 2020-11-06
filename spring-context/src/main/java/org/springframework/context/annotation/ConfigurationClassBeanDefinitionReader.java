@@ -16,17 +16,8 @@
 
 package org.springframework.context.annotation;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
@@ -35,13 +26,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader;
 import org.springframework.beans.factory.parsing.SourceExtractor;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
-import org.springframework.beans.factory.support.BeanDefinitionReader;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanNameGenerator;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.*;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.core.annotation.AnnotationAttributes;
@@ -52,6 +37,9 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * Reads a given fully-populated set of ConfigurationClass instances, registering bean
@@ -134,14 +122,31 @@ class ConfigurationClassBeanDefinitionReader {
 			return;
 		}
 
+		// 如果这个类是别的类import进来的, 将这个类注册到beanFactory中
+		// 因为prarse中处理@Import时, 并没有将Import的配置类注册到beanFactory中, 这里统一注册
 		if (configClass.isImported()) {
 			registerBeanDefinitionForImportedConfigurationClass(configClass);
 		}
+
+		// 将parse到的beanMethods注册到beanFactory中
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
 
+		// 处理configClass.importedResources
+		// 暂时不看里面的内容了
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
+
+		/**
+		 * 处理configClass.importBeanDefinitionRegistrars
+		 * 调用{@link org.springframework.context.annotation.ImportBeanDefinitionRegistrar#registerBeanDefinitions}
+		 *
+		 * 如果开启了AOP, 这里会调用
+		 * {@link org.springframework.context.annotation.AspectJAutoProxyRegistrar#registerBeanDefinitions}
+		 *
+		 * 如果使用了@{@link org.mybatis.spring.annotation.MapperScan} 这里会调用
+		 * {@link org.mybatis.spring.annotation.MapperScannerRegistrar#registerBeanDefinitions}
+		 */
 		loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
 	}
 

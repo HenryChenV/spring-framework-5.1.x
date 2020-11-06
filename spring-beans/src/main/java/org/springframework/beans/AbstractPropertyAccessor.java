@@ -16,14 +16,23 @@
 
 package org.springframework.beans;
 
+import org.springframework.lang.Nullable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.lang.Nullable;
-
 /**
+ * <p>
+ *     继承了{@link TypeConverterSupport}, 所以具备了类型转换的能力.
+ *     同时也是一个类型访问器,
+ *     但只实现了批量设置属性的方法({@link #setPropertyValues}), 这也是这个类的核心代码
+ *     真正setPropertyValue还是留给子类实现.
+ *     不过在这个类中并没有看到将属性设置和类型转换这两种能力结合起来用.
+ *     结合起用得看{@link AbstractNestablePropertyAccessor}
+ * </p>
+ *
  * Abstract implementation of the {@link PropertyAccessor} interface.
  * Provides base implementations of all convenience methods, with the
  * implementation of actual property access left to subclasses.
